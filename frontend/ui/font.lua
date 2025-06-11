@@ -49,7 +49,7 @@ local Font = {
         ffont = "NotoSans-Regular.ttf",
         smallffont = "NotoSans-Regular.ttf",
         largeffont = "NotoSans-Regular.ttf",
-
+        largelargeffont = "NotoSans-Regular.ttf",
         -- default font for reading position info
         rifont = "NotoSans-Regular.ttf",
 
@@ -90,6 +90,7 @@ local Font = {
         ffont = 20,
         smallffont = 15,
         largeffont = 25,
+        largelargeffont = 65,
         pgfont = 20,
         scfont = 20,
         rifont = 16,

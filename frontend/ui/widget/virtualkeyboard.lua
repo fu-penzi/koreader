@@ -131,7 +131,7 @@ function VirtualKey:init()
         self.callback = function () self.keyboard:delChar() end
         self.hold_callback = function ()
             self.ignore_key_release = true -- don't have delChar called on release
-            self.keyboard:delToStartOfLine()
+            -- self.keyboard:delToStartOfLine()
         end
         self.swipe_callback = function(ges)
             if ges.direction == "west" then

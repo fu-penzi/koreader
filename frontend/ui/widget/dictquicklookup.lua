@@ -326,13 +326,32 @@ function DictQuickLookup:init()
     end
     -- Lookup word
     self.lookup_word_text = TextWidget:new{
-        text = self.displayword,
-        face = Font:getFace(word_font_face, word_font_size),
+        text = self.displayword:gsub("【(.-)】", ""),
+        face = Font:getFace(word_font_face, 23),
         bold = true,
         max_width = self.content_width - math.max(lookup_edit_button_w, lookup_word_nb_w),
         padding = 0, -- to be aligned with lookup_word_nb
         lang = self.lang_in
     }
+
+    local word_text = TextWidget:new {
+        text = self.word,
+        face = Font:getFace(word_font_face, 21),
+        bold = true,
+        max_width = self.content_width,
+        padding = 0, -- to be aligned with lookup_word_nb
+        lang = self.lang_in
+    }
+
+    -- Group these 3 widgets
+    local word = OverlapGroup:new {
+        dimen = {
+            w = self.content_width,
+            h = lookup_height,
+        },
+        word_text,
+    }
+
     -- Group these 3 widgets
     local lookup_word = OverlapGroup:new{
         dimen = {
@@ -575,7 +594,7 @@ function DictQuickLookup:init()
         -- definitions or wikipedia articles)
         margin_bottom = margin_bottom + self.ui.view.footer:getHeight()
     end
-    local avail_height = Screen:getHeight() - margin_top - margin_bottom
+    local avail_height = Screen:getHeight() - margin_top - margin_bottom - Screen:getHeight() / 2
     -- Region in which the window will be aligned center/top/bottom:
     self.region = Geom:new{
         x = 0,
@@ -586,12 +605,13 @@ function DictQuickLookup:init()
     self.align = "center"
 
     local others_height = frame_bordersize * 2 -- DictQuickLookup border
-                        + self.dict_title:getHeight()
-                        + top_to_word_span:getSize().h
-                        + lookup_word:getSize().h
-                        + word_to_definition_span:getSize().h
-                        + definition_to_bottom_span:getSize().h
-                        + self.button_table:getSize().h
+        + self.dict_title:getHeight()
+        + top_to_word_span:getSize().h
+        + lookup_word:getSize().h
+        + lookup_word:getSize().h
+        + word_to_definition_span:getSize().h
+        + definition_to_bottom_span:getSize().h
+        + self.button_table:getSize().h
 
     -- To properly adjust the definition to the height of text, we need
     -- the line height a ScrollTextWidget will use for the current font
@@ -621,7 +641,7 @@ function DictQuickLookup:init()
     else
         -- Definition height was previously computed as 0.5*0.7*screen_height, so keep
         -- it that way. Components will add themselves to that.
-        self.definition_height = math.floor(avail_height * 0.5 * 0.7)
+        self.definition_height = math.floor(avail_height * 0.5 * 0.7 * 0.6)
         -- But we want it to fit to the lines that will show, to avoid
         -- any extra padding
         local nb_lines = Math.round(self.definition_height / self.definition_line_height)
@@ -701,6 +721,15 @@ function DictQuickLookup:init()
                     h = lookup_word:getSize().h,
                 },
                 lookup_word,
+            },
+            -- word_to_definition_span,
+            -- word
+            CenterContainer:new {
+                dimen = Geom:new {
+                    w = inner_width,
+                    h = lookup_word:getSize().h,
+                },
+                word,
             },
             word_to_definition_span,
             -- definition
@@ -860,7 +889,7 @@ function DictQuickLookup:_instantiateScrollWidget()
             html_resource_directory = self.dictionary_resource_directory,
             css = self:getHtmlDictionaryCss(),
             default_font_size = Screen:scaleBySize(self.dict_font_size),
-            width = self.content_width,
+            width = self.content_width - Size.padding.large,
             height = self.definition_height,
             dialog = self,
             highlight_text_selection = true,
@@ -885,7 +914,7 @@ function DictQuickLookup:_instantiateScrollWidget()
         self.stw_widget = ScrollTextWidget:new{
             text = self.definition,
             face = self.content_face,
-            width = self.content_width,
+            width = self.content_width - Size.padding.large,
             height = self.definition_height,
             dialog = self,
             justified = G_reader_settings:nilOrTrue("dict_justify"), -- allow for disabling justification
@@ -1103,6 +1132,11 @@ function DictQuickLookup:changeDictionary(index, skip_update)
         self.displayword = self.lookupword
         self.displaynb = nil
     else
+        -- CHANGE
+        self.definition = self.definition:gsub("〘(.-)〙%s*", "")
+        self.definition = self.definition:gsub("%.\n+", ".\n")
+        self.definition = self.definition:gsub("^.*】%s+", "")
+        -- self.definition = self.definition:gsub("^.+%s+", "")
         self.displayword = self.lookupword
         -- show "dict_index / nbresults" so we know where we're at and what's yet to see
         self.displaynb = T("%1 / %2", index, #self.results)
@@ -1110,11 +1144,11 @@ function DictQuickLookup:changeDictionary(index, skip_update)
         -- what was the selected text and if we selected wrong
         if index == 1 then
             if self.is_html then
-                self.definition = self.definition.."<br/>_______<br/>"
+                -- self.definition = "__________________________________________<br/>" .. self.definition
             else
-                self.definition = self.definition.."\n_______\n"
+                -- self.definition = "__________________________________________\n" .. self.definition
             end
-            self.definition = self.definition..T(_("(query : %1)"), self.word)
+            -- self.definition = self.definition .. T(_("(query : %1)"), self.word)
         end
     end
     self.displaydictname = self.dictionary

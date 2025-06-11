@@ -112,7 +112,26 @@ function CalendarDay:init()
 
     self.daynum_w = TextWidget:new{
         text = " " .. tostring(self.daynum),
-        face = Font:getFace(self.font_face, self.font_size),
+        face = Font:getFace(self.font_face, 12),
+        fgcolor = self.is_future and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
+        padding = 0,
+        bold = false,
+    }
+
+    local day_read_ratio = 0
+    if self.ratio_per_hour ~= nil then
+        for i,v in pairs(self.ratio_per_hour) do
+            day_read_ratio = day_read_ratio + v
+        end
+    end
+
+    local total_time_text = "      ----"
+    if day_read_ratio ~= 0 then
+        total_time_text = string.format("      %dh%dm", day_read_ratio, 60 * (day_read_ratio - math.floor(day_read_ratio)))
+    end
+    self.total_time_w = TextWidget:new{
+        text = total_time_text,
+        face = Font:getFace(self.font_face, 14),
         fgcolor = self.is_future and Blitbuffer.COLOR_GRAY or Blitbuffer.COLOR_BLACK,
         padding = 0,
         bold = true,
@@ -150,6 +169,7 @@ function CalendarDay:init()
         OverlapGroup:new{
             dimen = { w = inner_w },
             self.daynum_w,
+            self.total_time_w,
             self.nb_not_shown_w,
             self.histo_w, -- nil if not show_histo
         }
@@ -1327,9 +1347,22 @@ function CalendarView:_populateItems()
         day = 1,
         -- When hour is unspecified, Lua defaults to noon 12h00
     })
+
+    local ratio_per_hour_by_day = self.reader_statistics:getReadingRatioPerHourByDay(self.cur_month)
+    local day_read_ratio = 0
+    if ratio_per_hour_by_day ~= nil then
+        for i,tab in pairs(ratio_per_hour_by_day) do
+            if tab ~= nil then
+                for j,v in pairs(tab) do
+                    day_read_ratio = day_read_ratio + v
+                end
+            end
+        end
+    end
+
     -- Update title
     local month_text = datetime.longMonthTranslation[os.date("%B", month_start_ts)] .. os.date(" %Y", month_start_ts)
-    self.title_bar:setTitle(month_text)
+    self.title_bar:setTitle(month_text ..  string.format(" (%dh%dm)", day_read_ratio, 60 * (day_read_ratio - math.floor(day_read_ratio))))
     -- Update footer
     self.page_info_text:setText(self.cur_month)
     self.page_info_left_chev:enableDisable(self.cur_month > self.min_month)
@@ -1337,7 +1370,6 @@ function CalendarView:_populateItems()
     self.page_info_first_chev:enableDisable(self.cur_month > self.min_month)
     self.page_info_last_chev:enableDisable(self.cur_month < self.max_month or self.browse_future_months)
 
-    local ratio_per_hour_by_day = self.reader_statistics:getReadingRatioPerHourByDay(self.cur_month)
     local books_by_day = self.reader_statistics:getReadBookByDay(self.cur_month)
 
     table.insert(self.main_content, VerticalSpan:new{ width = self.inner_padding })

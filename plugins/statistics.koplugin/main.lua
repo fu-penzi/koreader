@@ -1090,13 +1090,57 @@ function ReaderStatistics:addToMainMenu(menu_items)
     menu_items.statistics = {
         text = _("Reading statistics"),
         sub_item_table = {
+            -- {
+            --     text = _("Enabled"),
+            --     checked_func = function()
+            --         return self.settings.is_enabled
+            --     end,
+            --     callback = function()
+            --         self:onToggleStatistics(true)
+            --     end,
+            -- },
             {
-                text = _("Enabled"),
-                checked_func = function()
-                    return self.settings.is_enabled
-                end,
+                text = _("Reading progress"),
+                keep_menu_open = true,
                 callback = function()
-                    self:onToggleStatistics(true) -- no notification
+                    self:insertDB()
+                    local current_duration, current_pages = self:getCurrentBookStats()
+                    local today_duration, today_pages = self:getTodayBookStats()
+                    local dates_stats = self:getReadingProgressStats(7)
+                    if dates_stats then
+                        UIManager:show(ReaderProgress:new{
+                            dates = dates_stats,
+                            current_duration = current_duration,
+                            current_pages = current_pages,
+                            today_duration = today_duration,
+                            today_pages = today_pages,
+                        })
+                    else
+                        UIManager:show(InfoMessage:new{
+                            text = _("Reading progress is not available.\nThere is no data for the last week."),
+                        })
+                    end
+                end
+            },
+            {
+                text = _("Time range"),
+                keep_menu_open = true,
+                callback = function()
+                    self:statMenu()
+                end
+            },
+            {
+                text = _("Calendar view"),
+                keep_menu_open = true,
+                callback = function()
+                    self:onShowCalendarView()
+                end,
+            },
+            {
+                text = _("Today's timeline"),
+                keep_menu_open = true,
+                callback = function()
+                    self:onShowCalendarDayView() -- no notification
                 end,
             },
             {
@@ -1362,50 +1406,7 @@ Time is in hours and minutes.]]),
                 end,
                 enabled_func = function() return self:isEnabled() end,
             },
-            {
-                text = _("Reading progress"),
-                keep_menu_open = true,
-                callback = function()
-                    self:insertDB()
-                    local current_duration, current_pages = self:getCurrentBookStats()
-                    local today_duration, today_pages = self:getTodayBookStats()
-                    local dates_stats = self:getReadingProgressStats(7)
-                    if dates_stats then
-                        UIManager:show(ReaderProgress:new{
-                            dates = dates_stats,
-                            current_duration = current_duration,
-                            current_pages = current_pages,
-                            today_duration = today_duration,
-                            today_pages = today_pages,
-                        })
-                    else
-                        UIManager:show(InfoMessage:new{
-                            text = _("Reading progress is not available.\nThere is no data for the last week."),
-                        })
-                    end
-                end
-            },
-            {
-                text = _("Time range"),
-                keep_menu_open = true,
-                callback = function()
-                    self:onShowTimeRange()
-                end
-            },
-            {
-                text = _("Calendar view"),
-                keep_menu_open = true,
-                callback = function()
-                    self:onShowCalendarView()
-                end,
-            },
-            {
-                text = _("Today's timeline"),
-                keep_menu_open = true,
-                callback = function()
-                    self:onShowCalendarDayView()
-                end,
-            },
+
         },
     }
 end
@@ -1600,7 +1601,7 @@ function ReaderStatistics:getCurrentBookStats()
                     GROUP  BY id_book, page
                );
     ]]
-    local current_pages, current_duration = conn:rowexec(string.format(sql_stmt, self.start_current_period))
+    local current_pages, current_duration = conn:rowexec(string.format(sql_stmt, os.time{year=2000, month=1, day=1, hour=0}))
     conn:close()
 
     if current_pages == nil then
