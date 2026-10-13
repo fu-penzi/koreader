@@ -202,6 +202,10 @@
         {"kanaIn": "のたもうたり", "kanaOut": "のたまう", "rulesIn": [], "rulesOut": ["v5"]}
     ],
     "-te": [
+        {"kanaIn": "した", "kanaOut": "", "rulesIn": [], "rulesOut": ["v1", "v5", "vk", "vs", "vz"]},
+        {"kanaIn": "し", "kanaOut": "", "rulesIn": [], "rulesOut": ["v1", "v5", "vk", "vs", "vz"]},
+        {"kanaIn": "して", "kanaOut": "", "rulesIn": [], "rulesOut": ["v1", "v5", "vk", "vs", "vz"]},
+        {"kanaIn": "て", "kanaOut": "", "rulesIn": [], "rulesOut": ["v1", "v5", "vk", "vs", "vz"]},
         {"kanaIn": "くて", "kanaOut": "い", "rulesIn": ["iru"], "rulesOut": ["adj-i"]},
         {"kanaIn": "て", "kanaOut": "る", "rulesIn": ["iru"], "rulesOut": ["v1"]},
         {"kanaIn": "いて", "kanaOut": "く", "rulesIn": ["iru"], "rulesOut": ["v5"]},
@@ -321,6 +325,7 @@
         {"kanaIn": "來い", "kanaOut": "來る", "rulesIn": [], "rulesOut": ["vk"]}
     ],
     "imperative negative": [
+        {"kanaIn": "だ", "kanaOut": "", "rulesIn": [], "rulesOut": ["v1", "v5", "vk", "vs", "vz"]},
         {"kanaIn": "な", "kanaOut": "", "rulesIn": [], "rulesOut": ["v1", "v5", "vk", "vs", "vz"]}
     ],
     "masu stem": [

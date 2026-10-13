@@ -79,7 +79,7 @@ function datetime.secondsToClock(seconds, withoutSeconds, withDays)
         end
     elseif seconds == 0 or seconds ~= seconds then
         if withoutSeconds then
-            return "00:00"
+            return "0:00"
         else
             return "00:00:00"
         end
@@ -89,16 +89,16 @@ function datetime.secondsToClock(seconds, withoutSeconds, withDays)
         local hours
         if withDays then
             days = string.format("%d", seconds * (1/(24*3600))) -- implicit math.floor for string.format
-            hours = string.format("%02d", (seconds * (1/3600)) % 24)
+            hours = string.format("%d", (seconds * (1/3600)) % 24)
         else
-            hours = string.format("%02d", seconds * (1/3600))
+            hours = string.format("%d", seconds * (1/3600))
         end
         local mins = string.format("%02d", round(seconds % 3600 * (1/60)))
         if withoutSeconds then
             if mins == "60" then
                 -- Can only happen because of rounding, which only happens if withoutSeconds...
                 mins = string.format("%02d", 0)
-                hours = string.format("%02d", hours + 1)
+                hours = string.format("%d", hours + 1)
             end
             return  (days ~= "0" and (days .. C_("Time", "d")) or "") .. hours .. ":" .. mins
         else
